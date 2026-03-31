@@ -20,7 +20,7 @@ export function Sidebar({
           <h1>PigeonClaw</h1>
         </div>
         <button className="ghost-button" type="button" onClick={onCreateProject}>
-          New Project
+          Add Folder
         </button>
       </div>
 
@@ -53,7 +53,7 @@ export function Sidebar({
           {projects.length === 0 ? (
             <div className="empty-state">
               <strong>No projects yet</strong>
-              <p>Create a project to get a public webhook URL and local Codex workflow.</p>
+              <p>Choose a local repository folder to get a webhook URL and local Codex workflow.</p>
             </div>
           ) : null}
         </div>

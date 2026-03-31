@@ -9,6 +9,7 @@ const api = {
   updateSettings: (payload: { codexPath?: string; globalConcurrency?: number }) =>
     ipcRenderer.invoke('settings:update', payload),
   listProjects: () => ipcRenderer.invoke('projects:list'),
+  createProjectFromFolder: () => ipcRenderer.invoke('projects:create-from-folder'),
   saveProject: (payload: DesktopProjectDraft) => ipcRenderer.invoke('projects:save', payload),
   listIncidents: () => ipcRenderer.invoke('incidents:list'),
   listRuns: (projectId?: string) => ipcRenderer.invoke('runs:list', projectId),

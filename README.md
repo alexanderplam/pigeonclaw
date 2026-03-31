@@ -61,6 +61,8 @@ See [SECURITY.md](./SECURITY.md) for the full policy.
    pnpm dev:desktop
    ```
 
+   The desktop command automatically prepares Electron native dependencies the first time it runs, and again whenever the Electron version or machine architecture changes.
+
 ## Render deployment
 
 `render.yaml` defines the production relay and its Postgres database. The relay is designed for a single Render web service plus one Postgres instance.

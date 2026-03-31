@@ -47,12 +47,44 @@ code {
   min-height: 100%;
   display: grid;
   place-items: center;
-  padding: 2rem;
+  padding: 3.5rem 2rem 2rem;
 }
 
 .setup-shell {
   grid-template-columns: minmax(320px, 420px) minmax(420px, 560px);
   gap: 2rem;
+  position: relative;
+  overflow: auto;
+  align-content: start;
+}
+
+.loading-state,
+.app-shell {
+  position: relative;
+}
+
+.window-drag-region {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2.1rem;
+  -webkit-app-region: drag;
+  z-index: 10;
+}
+
+.loading-card {
+  max-width: 520px;
+  text-align: center;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.loading-card h1,
+.loading-card p {
+  margin: 0;
+}
+
+.loading-card p {
+  color: var(--pc-text-muted);
 }
 
 .setup-hero h1 {
@@ -167,7 +199,8 @@ code {
   grid-template-columns: 320px minmax(0, 1fr);
   height: 100%;
   gap: 1rem;
-  padding: 1rem;
+  padding: 3.1rem 1rem 1rem;
+  overflow: hidden;
 }
 
 .sidebar {
@@ -185,6 +218,7 @@ code {
 .sidebar-card,
 .project-list,
 .workspace,
+.workspace-scroll,
 .history-list {
   min-height: 0;
 }
@@ -244,7 +278,17 @@ code {
 .workspace {
   display: grid;
   gap: 1rem;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.workspace-scroll {
+  overflow: auto;
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  padding-right: 0.15rem;
 }
 
 .status-bar {
@@ -277,6 +321,21 @@ code {
   min-height: 0;
 }
 
+.project-detail {
+  overflow: visible;
+}
+
+.detail-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: visible;
+}
+
+.detail-panel-empty {
+  justify-content: center;
+}
+
 .credential-card {
   border: 1px solid var(--pc-border);
   border-radius: 16px;
@@ -306,7 +365,7 @@ code {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  overflow: auto;
+  overflow: visible;
   margin-top: 1rem;
 }
 
@@ -331,6 +390,17 @@ code {
   padding: 1rem;
   border: 1px dashed var(--pc-border);
   border-radius: 14px;
+}
+
+.empty-state-large {
+  display: grid;
+  gap: 0.9rem;
+  max-width: 640px;
+}
+
+.empty-state-large strong,
+.empty-state-large p {
+  margin: 0;
 }
 
 .empty-state.compact {

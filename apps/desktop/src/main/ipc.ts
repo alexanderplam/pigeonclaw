@@ -1,4 +1,7 @@
-import { ipcMain } from 'electron';
+import { basename } from 'node:path';
+
+import { BrowserWindow, dialog, ipcMain } from 'electron';
+import type { OpenDialogOptions } from 'electron';
 
 import {
   type DesktopProjectDraft,
@@ -7,6 +10,11 @@ import {
   projectSnapshotSchema,
 } from '@pigeonclaw/shared';
 
+import {
+  ensureUniqueProjectSlug,
+  makeProjectDraft,
+  slugifyProjectName,
+} from '../shared/project-defaults.js';
 import type { RelayClient } from './services/relay-client.js';
 import type { LocalStore } from './stores/local-store.js';
 
@@ -49,6 +57,10 @@ export function registerIpcHandlers(input: {
 
   ipcMain.handle('projects:list', async () => {
     const localProjects = input.store.listProjects();
+    if (!input.relayClient.getStatus().paired) {
+      return localProjects;
+    }
+
     try {
       const remoteProjects = await input.relayClient.listProjects();
       const merged = mergeProjects(localProjects, remoteProjects.projects);
@@ -122,7 +134,80 @@ export function registerIpcHandlers(input: {
     return snapshot;
   });
 
-  ipcMain.handle('incidents:list', async () => input.relayClient.listIncidents());
+  ipcMain.handle('projects:create-from-folder', async () => {
+    if (!input.relayClient.getStatus().paired) {
+      throw new Error('Pair this Mac with your relay before adding a project.');
+    }
+
+    const pickerOptions: OpenDialogOptions = {
+      title: 'Choose a local repository',
+      buttonLabel: 'Add Project',
+      properties: ['openDirectory'],
+    };
+    const ownerWindow = BrowserWindow.getFocusedWindow();
+    const picker = ownerWindow
+      ? await dialog.showOpenDialog(ownerWindow, pickerOptions)
+      : await dialog.showOpenDialog(pickerOptions);
+
+    if (picker.canceled || picker.filePaths.length === 0) {
+      return null;
+    }
+
+    const repoPath = picker.filePaths[0];
+    const existingProjects = input.store.listProjects();
+    const existingProject = existingProjects.find((project) => project.repoPath === repoPath);
+    if (existingProject) {
+      return existingProject;
+    }
+
+    const folderName = basename(repoPath).trim() || 'Project';
+    const draft = makeProjectDraft(null, {
+      name: folderName.slice(0, 80),
+      slug: ensureUniqueProjectSlug(
+        slugifyProjectName(folderName),
+        existingProjects.map((project) => project.slug),
+      ),
+      repoPath,
+    });
+
+    const created = await input.relayClient.createProject(draft);
+    const snapshot = projectSnapshotSchema.parse({
+      projectId: created.project.id,
+      name: draft.name,
+      slug: draft.slug,
+      repoPath: draft.repoPath,
+      basePrompt: draft.basePrompt,
+      eventPromptTemplate: draft.eventPromptTemplate,
+      localRules: draft.localRules,
+      codexModel: draft.codexModel,
+      concurrencyLimit: draft.concurrencyLimit,
+      sandboxMode: draft.sandboxMode,
+      cooldownSeconds: draft.cooldownSeconds,
+      fingerprintFields: draft.fingerprintFields,
+      eventIdPath: draft.eventIdPath,
+      enabled: draft.enabled,
+      webhookUrl: created.project.webhookUrl,
+      webhookToken: created.issuedWebhookToken,
+      signingSecret: created.issuedSigningSecret,
+      signingSecretHint: created.project.signingSecretHint,
+      updatedAt: created.project.updatedAt,
+    });
+
+    input.store.upsertProject(snapshot);
+    return snapshot;
+  });
+
+  ipcMain.handle('incidents:list', async () => {
+    if (!input.relayClient.getStatus().paired) {
+      return [];
+    }
+
+    try {
+      return await input.relayClient.listIncidents();
+    } catch {
+      return [];
+    }
+  });
   ipcMain.handle('runs:list', async (_event, projectId?: string) =>
     input.store.listRuns(projectId),
   );

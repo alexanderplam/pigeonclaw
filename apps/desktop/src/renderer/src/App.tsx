@@ -12,6 +12,8 @@ type SetupState = Awaited<ReturnType<typeof window.pigeonclaw.getSetupState>>;
 
 export default function App() {
   const [setupState, setSetupState] = useState<SetupState | null>(null);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
+  const [projectActionError, setProjectActionError] = useState<string | null>(null);
   const [projects, setProjects] = useState<ProjectSnapshot[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [runs, setRuns] = useState<RunUpdate[]>([]);
@@ -23,20 +25,44 @@ export default function App() {
   );
 
   const refreshAll = useCallback(async () => {
-    const [nextSetup, nextProjects, nextIncidents, nextRuns] = await Promise.all([
-      window.pigeonclaw.getSetupState(),
-      window.pigeonclaw.listProjects(),
-      window.pigeonclaw.listIncidents().catch(() => []),
-      window.pigeonclaw.listRuns(),
-    ]);
+    if (!window.pigeonclaw?.getSetupState) {
+      setLoadingError(
+        'The desktop bridge did not initialize. Restart the app to reload the preload script.',
+      );
+      return;
+    }
 
-    setSetupState(nextSetup);
-    setProjects(nextProjects);
-    setIncidents(nextIncidents);
-    setRuns(nextRuns);
+    try {
+      const nextSetup = await window.pigeonclaw.getSetupState();
+      setSetupState(nextSetup);
 
-    if (!selectedProjectId && nextProjects[0]) {
-      setSelectedProjectId(nextProjects[0].projectId);
+      const [projectsResult, incidentsResult, runsResult] = await Promise.allSettled([
+        window.pigeonclaw.listProjects(),
+        window.pigeonclaw.listIncidents(),
+        window.pigeonclaw.listRuns(),
+      ]);
+
+      const nextProjects: ProjectSnapshot[] =
+        projectsResult.status === 'fulfilled' ? projectsResult.value : [];
+      const nextIncidents: Incident[] =
+        incidentsResult.status === 'fulfilled' ? incidentsResult.value : [];
+      const nextRuns: RunUpdate[] = runsResult.status === 'fulfilled' ? runsResult.value : [];
+
+      setProjects(nextProjects);
+      setIncidents(nextIncidents);
+      setRuns(nextRuns);
+      setLoadingError(null);
+
+      if (
+        !selectedProjectId ||
+        !nextProjects.some((project) => project.projectId === selectedProjectId)
+      ) {
+        setSelectedProjectId(nextProjects[0]?.projectId ?? null);
+      }
+    } catch (error) {
+      setLoadingError(
+        error instanceof Error ? error.message : 'PigeonClaw could not load local state.',
+      );
     }
   }, [selectedProjectId]);
 
@@ -51,14 +77,47 @@ export default function App() {
     };
   }, [refreshAll]);
 
+  const handleCreateProjectFromFolder = useCallback(async () => {
+    setProjectActionError(null);
+
+    try {
+      const project = await window.pigeonclaw.createProjectFromFolder();
+      if (!project) {
+        return;
+      }
+
+      await refreshAll();
+      setSelectedProjectId(project.projectId);
+    } catch (error) {
+      setProjectActionError(
+        error instanceof Error ? error.message : 'Could not add this folder as a project.',
+      );
+    }
+  }, [refreshAll]);
+
   if (!setupState) {
-    return <div className="loading-state">Loading PigeonClaw…</div>;
+    return (
+      <div className="loading-state">
+        <div className="window-drag-region" aria-hidden="true" />
+        <div className="loading-card">
+          <h1>Loading PigeonClaw…</h1>
+          <p>
+            {loadingError ??
+              'Preparing the local desktop bridge, project state, and relay connection.'}
+          </p>
+          <button className="ghost-button" type="button" onClick={() => void refreshAll()}>
+            Retry
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (!setupState.paired) {
     return (
       <SetupView
         defaultDeviceName={setupState.deviceName ?? 'My Mac'}
+        errorMessage={loadingError}
         onPair={async (payload) => {
           await window.pigeonclaw.pairDevice(payload);
           await refreshAll();
@@ -69,11 +128,12 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <div className="window-drag-region" aria-hidden="true" />
       <Sidebar
         projects={projects}
         selectedProjectId={selectedProjectId}
         onSelectProject={setSelectedProjectId}
-        onCreateProject={() => setSelectedProjectId(null)}
+        onCreateProject={() => void handleCreateProjectFromFolder()}
       />
 
       <main className="workspace">
@@ -88,16 +148,21 @@ export default function App() {
           }}
         />
 
-        <ProjectForm
-          project={selectedProject}
-          onSave={async (draft: DesktopProjectDraft) => {
-            const saved = await window.pigeonclaw.saveProject(draft);
-            await refreshAll();
-            setSelectedProjectId(saved.projectId);
-          }}
-        />
+        <div className="workspace-scroll">
+          <ProjectForm
+            project={selectedProject}
+            hasProjects={projects.length > 0}
+            createFromFolderError={projectActionError}
+            onCreateFromFolder={handleCreateProjectFromFolder}
+            onSave={async (draft: DesktopProjectDraft) => {
+              const saved = await window.pigeonclaw.saveProject(draft);
+              await refreshAll();
+              setSelectedProjectId(saved.projectId);
+            }}
+          />
 
-        <HistoryView project={selectedProject} incidents={incidents} runs={runs} />
+          <HistoryView project={selectedProject} incidents={incidents} runs={runs} />
+        </div>
       </main>
     </div>
   );

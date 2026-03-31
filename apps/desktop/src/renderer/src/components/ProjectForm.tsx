@@ -2,27 +2,28 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type { DesktopProjectDraft, ProjectSnapshot } from '@pigeonclaw/shared';
 import { SectionHeader, StatusPill, SurfaceCard } from '@pigeonclaw/ui';
-
-const defaultBasePrompt =
-  'You are triaging a live development incident. Investigate the repository, use the event context carefully, avoid broad changes, and summarize the result clearly.';
-
-const defaultEventPrompt =
-  'An event triggered this repository.\n\nIncident: {{incident.id}}\nFingerprint: {{incident.fingerprint}}\nDuplicate count: {{incident.duplicateCount}}\nProject: {{project.name}}\nRepository: {{project.repoPath}}\n\nIncoming payload:\n{{event}}\n';
+import { makeProjectDraft } from '../../../shared/project-defaults.js';
 
 export function ProjectForm({
   project,
+  hasProjects,
+  createFromFolderError,
+  onCreateFromFolder,
   onSave,
 }: {
   project: ProjectSnapshot | null;
+  hasProjects: boolean;
+  createFromFolderError: string | null;
+  onCreateFromFolder: () => Promise<void>;
   onSave: (draft: DesktopProjectDraft) => Promise<void>;
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rotateSigningSecret, setRotateSigningSecret] = useState(false);
-  const [formState, setFormState] = useState<DesktopProjectDraft>(() => makeDraft(project));
+  const [formState, setFormState] = useState<DesktopProjectDraft>(() => makeProjectDraft(project));
 
   useEffect(() => {
-    setFormState(makeDraft(project));
+    setFormState(makeProjectDraft(project));
     setRotateSigningSecret(false);
   }, [project]);
 
@@ -31,6 +32,37 @@ export function ProjectForm({
     [formState.fingerprintFields],
   );
   const rulesText = useMemo(() => formState.localRules.join('\n'), [formState.localRules]);
+
+  if (!project) {
+    return (
+      <div className="project-detail">
+        <SurfaceCard className="detail-panel detail-panel-empty">
+          <SectionHeader
+            title={hasProjects ? 'Add another repository' : 'Add your first repository'}
+            subtitle="Choose a local project folder first. You can tune the webhook rules, prompt, and idempotency settings after it exists."
+          />
+
+          <div className="empty-state empty-state-large">
+            <strong>Start from a folder, not a form</strong>
+            <p>
+              PigeonClaw will infer the project name, generate a webhook, store the local path, and
+              then open the full configuration view for refinement.
+            </p>
+
+            {createFromFolderError ? <p className="form-error">{createFromFolderError}</p> : null}
+
+            <button
+              className="primary-button"
+              type="button"
+              onClick={() => void onCreateFromFolder()}
+            >
+              Choose Project Folder
+            </button>
+          </div>
+        </SurfaceCard>
+      </div>
+    );
+  }
 
   return (
     <div className="project-detail">
@@ -277,26 +309,4 @@ export function ProjectForm({
       </SurfaceCard>
     </div>
   );
-}
-
-function makeDraft(project: ProjectSnapshot | null): DesktopProjectDraft {
-  return {
-    projectId: project?.projectId,
-    name: project?.name ?? '',
-    slug: project?.slug ?? '',
-    repoPath: project?.repoPath ?? '',
-    basePrompt: project?.basePrompt ?? defaultBasePrompt,
-    eventPromptTemplate: project?.eventPromptTemplate ?? defaultEventPrompt,
-    localRules: project?.localRules ?? ['Summarize your findings and any code changes clearly.'],
-    codexModel: project?.codexModel,
-    concurrencyLimit: project?.concurrencyLimit ?? 1,
-    sandboxMode: project?.sandboxMode ?? 'workspace-write',
-    cooldownSeconds: project?.cooldownSeconds ?? 600,
-    fingerprintFields: project?.fingerprintFields ?? [
-      { path: 'error.message' },
-      { path: 'error.code' },
-    ],
-    eventIdPath: project?.eventIdPath,
-    enabled: project?.enabled ?? true,
-  };
 }

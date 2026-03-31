@@ -5,9 +5,10 @@
   "type": "module",
   "main": "./out/main/index.js",
   "scripts": {
+    "ensure:native-deps": "node ./scripts/ensure-native-deps.mjs",
     "build": "electron-vite build",
-    "dev": "electron-vite dev",
-    "dist:mac": "pnpm build && electron-builder --mac dmg",
+    "dev": "pnpm run ensure:native-deps && electron-vite dev",
+    "dist:mac": "pnpm run ensure:native-deps && pnpm build && electron-builder --mac dmg",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

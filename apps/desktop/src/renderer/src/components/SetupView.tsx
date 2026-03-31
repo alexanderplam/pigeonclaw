@@ -5,6 +5,7 @@ import { SectionHeader, SurfaceCard } from '@pigeonclaw/ui';
 export function SetupView({
   onPair,
   defaultDeviceName,
+  errorMessage,
 }: {
   onPair: (payload: {
     relayBaseUrl: string;
@@ -12,6 +13,7 @@ export function SetupView({
     deviceName: string;
   }) => Promise<void>;
   defaultDeviceName: string;
+  errorMessage?: string | null;
 }) {
   const [relayBaseUrl, setRelayBaseUrl] = useState('http://localhost:3001');
   const [bootstrapToken, setBootstrapToken] = useState('');
@@ -21,6 +23,7 @@ export function SetupView({
 
   return (
     <div className="setup-shell">
+      <div className="window-drag-region" aria-hidden="true" />
       <div className="setup-hero">
         <span className="setup-kicker">PigeonClaw Relay Pairing</span>
         <h1>Connect this Mac to your hosted webhook relay.</h1>
@@ -28,6 +31,7 @@ export function SetupView({
           The desktop app stays local. The relay receives public events, deduplicates them, and
           forwards secure jobs here for Codex execution.
         </p>
+        {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
       </div>
 
       <SurfaceCard className="setup-card">

@@ -25,7 +25,7 @@ async function createWindow() {
       y: 18,
     },
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(__dirname, '../preload/index.mjs'),
       contextIsolation: true,
       sandbox: false,
     },
