@@ -10,7 +10,7 @@ services:
     rootDir: apps/relay
     plan: starter
     autoDeploy: true
-    buildCommand: cd ../.. && corepack enable && pnpm install --frozen-lockfile && pnpm --filter @pigeonclaw/relay build
+    buildCommand: cd ../.. && corepack enable && pnpm install --frozen-lockfile && pnpm --filter @pigeonclaw/shared build && pnpm --filter @pigeonclaw/relay build
     startCommand: cd ../.. && pnpm --filter @pigeonclaw/relay start
     envVars:
       - key: NODE_ENV
