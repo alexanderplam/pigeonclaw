@@ -1,0 +1,81 @@
+:root {
+  color-scheme: dark;
+  --pc-bg: #0a0d14;
+  --pc-bg-elevated: rgba(18, 23, 35, 0.94);
+  --pc-bg-sidebar: rgba(12, 16, 24, 0.92);
+  --pc-surface: rgba(255, 255, 255, 0.035);
+  --pc-surface-strong: rgba(255, 255, 255, 0.06);
+  --pc-surface-hover: rgba(255, 255, 255, 0.08);
+  --pc-border: rgba(255, 255, 255, 0.08);
+  --pc-border-strong: rgba(255, 255, 255, 0.14);
+  --pc-text: #eef3fb;
+  --pc-text-muted: #94a3b8;
+  --pc-text-soft: #6f7c92;
+  --pc-accent: #59b0ff;
+  --pc-accent-muted: rgba(89, 176, 255, 0.14);
+  --pc-success: #5fd1a5;
+  --pc-warning: #f1c470;
+  --pc-danger: #ff8877;
+  --pc-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+  --pc-radius-lg: 18px;
+  --pc-radius-md: 14px;
+  --pc-radius-sm: 10px;
+  --pc-font-sans: "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+  --pc-font-mono: "SF Mono", "JetBrains Mono", ui-monospace, monospace;
+}
+
+body {
+  background: radial-gradient(circle at top left, rgba(89, 176, 255, 0.12), transparent 38%),
+    radial-gradient(circle at top right, rgba(95, 209, 165, 0.08), transparent 32%),
+    linear-gradient(180deg, #0b0f18 0%, #090c13 100%);
+  color: var(--pc-text);
+  font-family: var(--pc-font-sans);
+}
+
+.pc-surface-card {
+  border: 1px solid var(--pc-border);
+  background: var(--pc-surface);
+  border-radius: var(--pc-radius-md);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.pc-section-header h2 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.pc-section-header p {
+  margin: 0.25rem 0 0;
+  color: var(--pc-text-muted);
+  font-size: 0.82rem;
+}
+
+.pc-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--pc-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--pc-text-muted);
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.pc-status-pill--success {
+  color: var(--pc-success);
+  background: color-mix(in srgb, var(--pc-success) 12%, transparent);
+}
+
+.pc-status-pill--warning {
+  color: var(--pc-warning);
+  background: color-mix(in srgb, var(--pc-warning) 12%, transparent);
+}
+
+.pc-status-pill--danger {
+  color: var(--pc-danger);
+  background: color-mix(in srgb, var(--pc-danger) 12%, transparent);
+}

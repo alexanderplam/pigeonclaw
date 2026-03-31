@@ -1,0 +1,17 @@
+node_modules
+dist
+build
+out
+coverage
+.DS_Store
+.idea
+.vscode
+*.log
+.env
+.env.*
+!.env.example
+apps/desktop/.vite
+apps/desktop/.electron
+apps/desktop/out
+apps/desktop/release
+apps/relay/.turbo

@@ -1,0 +1,33 @@
+{
+  "name": "pigeonclaw",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.11.0",
+  "engines": {
+    "node": ">=20.17.0"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev:desktop": "pnpm --filter @pigeonclaw/desktop dev",
+    "dev:relay": "pnpm --filter @pigeonclaw/relay dev",
+    "format": "biome format --write .",
+    "lint": "biome check .",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm --filter @pigeonclaw/shared build && pnpm --filter @pigeonclaw/ui build && pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^20.17.46",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "better-sqlite3",
+      "electron",
+      "electron-winstaller",
+      "esbuild"
+    ]
+  }
+}

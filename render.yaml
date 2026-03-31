@@ -1,0 +1,25 @@
+databases:
+  - name: pigeonclaw-db
+    databaseName: pigeonclaw
+    plan: basic-256mb
+
+services:
+  - type: web
+    name: pigeonclaw-relay
+    runtime: node
+    rootDir: apps/relay
+    plan: starter
+    autoDeploy: true
+    buildCommand: cd ../.. && corepack enable && pnpm install --frozen-lockfile && pnpm --filter @pigeonclaw/relay build
+    startCommand: cd ../.. && pnpm --filter @pigeonclaw/relay start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: RELAY_BOOTSTRAP_TOKEN
+        sync: false
+      - key: RELAY_ENCRYPTION_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pigeonclaw-db
+          property: connectionString
