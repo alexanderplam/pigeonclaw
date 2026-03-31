@@ -14,7 +14,7 @@
   "dependencies": {
     "@pigeonclaw/shared": "workspace:*",
     "@pigeonclaw/ui": "workspace:*",
-    "better-sqlite3": "^11.10.0",
+    "better-sqlite3": "^12.8.0",
     "electron-updater": "^6.3.9",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
