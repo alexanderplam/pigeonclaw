@@ -1,53 +1,52 @@
-import { StatusPill, SurfaceCard } from '@pigeonclaw/ui';
+import { StatusPill } from '@pigeonclaw/ui';
 
 export function StatusBar({
   relayStatus,
   deviceName,
-  codexPath,
-  globalConcurrency,
-  onSaveSettings,
+  projectName,
+  repoPath,
+  onOpenSettings,
 }: {
   relayStatus: string;
   deviceName?: string | null;
-  codexPath: string;
-  globalConcurrency: number;
-  onSaveSettings: (payload: { codexPath?: string; globalConcurrency?: number }) => Promise<void>;
+  projectName?: string | null;
+  repoPath?: string | null;
+  onOpenSettings: () => void;
 }) {
   return (
-    <SurfaceCard className="status-bar">
-      <div className="status-cluster">
-        <StatusPill
-          tone={
-            relayStatus === 'connected' ? 'success' : relayStatus === 'error' ? 'danger' : 'warning'
-          }
-        >
-          Relay {relayStatus}
-        </StatusPill>
-        <span>{deviceName ?? 'Unpaired Mac'}</span>
-      </div>
-
-      <div className="status-settings">
-        <label className="inline-field">
-          <span>Codex path</span>
-          <input
-            defaultValue={codexPath}
-            onBlur={(event) => void onSaveSettings({ codexPath: event.target.value })}
-          />
-        </label>
-
-        <label className="inline-field small">
-          <span>Global concurrency</span>
-          <input
-            type="number"
-            min={1}
-            max={8}
-            defaultValue={globalConcurrency}
-            onBlur={(event) =>
-              void onSaveSettings({ globalConcurrency: Number(event.target.value || 2) })
+    <header className="status-bar">
+      <div className="toolbar-project">
+        <span className="toolbar-kicker">Current project</span>
+        <div className="toolbar-title-row">
+          <h1>{projectName ?? 'No project selected'}</h1>
+          <StatusPill
+            tone={
+              relayStatus === 'connected'
+                ? 'success'
+                : relayStatus === 'error'
+                  ? 'danger'
+                  : 'warning'
             }
-          />
-        </label>
+          >
+            Relay {relayStatus}
+          </StatusPill>
+        </div>
+        <p>{repoPath ?? 'Choose a local repository to create a project and issue a webhook.'}</p>
       </div>
-    </SurfaceCard>
+
+      <div className="toolbar-meta">
+        <div className="toolbar-device">
+          <span className="toolbar-device-label">Device</span>
+          <strong>{deviceName ?? 'Unpaired Mac'}</strong>
+        </div>
+        <button
+          className="ghost-button toolbar-settings-button"
+          type="button"
+          onClick={onOpenSettings}
+        >
+          Settings
+        </button>
+      </div>
+    </header>
   );
 }

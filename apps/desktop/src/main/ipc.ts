@@ -1,6 +1,6 @@
 import { basename } from 'node:path';
 
-import { BrowserWindow, dialog, ipcMain } from 'electron';
+import { BrowserWindow, dialog, ipcMain, shell } from 'electron';
 import type { OpenDialogOptions } from 'electron';
 
 import {
@@ -211,6 +211,13 @@ export function registerIpcHandlers(input: {
   ipcMain.handle('runs:list', async (_event, projectId?: string) =>
     input.store.listRuns(projectId),
   );
+  ipcMain.handle('system:open-path', async (_event, targetPath: string) => {
+    const result = await shell.openPath(targetPath);
+    if (result) {
+      throw new Error(result);
+    }
+    return true;
+  });
 }
 
 function mergeProjects(

@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { DesktopProjectDraft, Incident, ProjectSnapshot, RunUpdate } from '@pigeonclaw/shared';
 
-import { HistoryView } from './components/HistoryView.js';
 import { ProjectForm } from './components/ProjectForm.js';
+import { SettingsModal } from './components/SettingsModal.js';
 import { SetupView } from './components/SetupView.js';
 import { Sidebar } from './components/Sidebar.js';
 import { StatusBar } from './components/StatusBar.js';
@@ -14,6 +14,7 @@ export default function App() {
   const [setupState, setSetupState] = useState<SetupState | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const [projectActionError, setProjectActionError] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [projects, setProjects] = useState<ProjectSnapshot[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [runs, setRuns] = useState<RunUpdate[]>([]);
@@ -140,17 +141,16 @@ export default function App() {
         <StatusBar
           relayStatus={setupState.relayStatus}
           deviceName={setupState.deviceName}
-          codexPath={setupState.codexPath}
-          globalConcurrency={setupState.globalConcurrency}
-          onSaveSettings={async (payload) => {
-            await window.pigeonclaw.updateSettings(payload);
-            await refreshAll();
-          }}
+          projectName={selectedProject?.name}
+          repoPath={selectedProject?.repoPath}
+          onOpenSettings={() => setSettingsOpen(true)}
         />
 
         <div className="workspace-scroll">
           <ProjectForm
             project={selectedProject}
+            incidents={incidents}
+            runs={runs}
             hasProjects={projects.length > 0}
             createFromFolderError={projectActionError}
             onCreateFromFolder={handleCreateProjectFromFolder}
@@ -160,10 +160,22 @@ export default function App() {
               setSelectedProjectId(saved.projectId);
             }}
           />
-
-          <HistoryView project={selectedProject} incidents={incidents} runs={runs} />
         </div>
       </main>
+
+      <SettingsModal
+        isOpen={settingsOpen}
+        relayStatus={setupState.relayStatus}
+        relayBaseUrl={setupState.relayBaseUrl}
+        deviceName={setupState.deviceName}
+        codexPath={setupState.codexPath}
+        globalConcurrency={setupState.globalConcurrency}
+        onClose={() => setSettingsOpen(false)}
+        onSave={async (payload) => {
+          await window.pigeonclaw.updateSettings(payload);
+          await refreshAll();
+        }}
+      />
     </div>
   );
 }

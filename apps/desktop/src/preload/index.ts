@@ -13,6 +13,7 @@ const api = {
   saveProject: (payload: DesktopProjectDraft) => ipcRenderer.invoke('projects:save', payload),
   listIncidents: () => ipcRenderer.invoke('incidents:list'),
   listRuns: (projectId?: string) => ipcRenderer.invoke('runs:list', projectId),
+  openPath: (targetPath: string) => ipcRenderer.invoke('system:open-path', targetPath),
 };
 
 contextBridge.exposeInMainWorld('pigeonclaw', api);
