@@ -1,6 +1,5 @@
-import { contextBridge, ipcRenderer } from 'electron';
-
 import type { DesktopProjectDraft } from '@pigeonclaw/shared';
+import { contextBridge, ipcRenderer } from 'electron';
 
 const api = {
   getSetupState: () => ipcRenderer.invoke('setup:get-state'),

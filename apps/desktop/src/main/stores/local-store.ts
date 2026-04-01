@@ -1,10 +1,8 @@
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
-
+import { type ProjectSnapshot, projectSnapshotSchema, type RunUpdate } from '@pigeonclaw/shared';
 import Database from 'better-sqlite3';
 import { safeStorage } from 'electron';
-
-import { type ProjectSnapshot, type RunUpdate, projectSnapshotSchema } from '@pigeonclaw/shared';
 
 type RunRow = {
   id: string;

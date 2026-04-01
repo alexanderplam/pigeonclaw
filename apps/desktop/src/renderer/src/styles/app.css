@@ -164,7 +164,11 @@ code {
 .filter-chip {
   border-radius: 10px;
   border: 1px solid var(--pc-border);
-  transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    transform 140ms ease;
 }
 
 .primary-button,
@@ -714,7 +718,10 @@ code {
   display: grid;
   gap: 0.42rem;
   cursor: pointer;
-  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    transform 140ms ease;
 }
 
 .mode-option strong {

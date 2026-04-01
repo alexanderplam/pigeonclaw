@@ -1,7 +1,6 @@
-import { useMemo, useState } from 'react';
-
 import type { Incident, ProjectSnapshot, RunUpdate } from '@pigeonclaw/shared';
 import { SectionHeader, StatusPill, SurfaceCard } from '@pigeonclaw/ui';
+import { useMemo, useState } from 'react';
 
 import { buildTimelineItems, formatDateTime, formatRelativeTime } from './runtime-utils.js';
 

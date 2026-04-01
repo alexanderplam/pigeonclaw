@@ -1,14 +1,12 @@
 import { basename } from 'node:path';
-
-import { BrowserWindow, dialog, ipcMain, shell } from 'electron';
-import type { OpenDialogOptions } from 'electron';
-
 import {
   type DesktopProjectDraft,
-  type ProjectSnapshot,
   desktopProjectDraftSchema,
+  type ProjectSnapshot,
   projectSnapshotSchema,
 } from '@pigeonclaw/shared';
+import type { OpenDialogOptions } from 'electron';
+import { BrowserWindow, dialog, ipcMain, shell } from 'electron';
 
 import {
   ensureUniqueProjectSlug,

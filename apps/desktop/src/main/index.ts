@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 
-import { BrowserWindow, app } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import desktopPackage from '../../package.json' with { type: 'json' };
 
 import { registerIpcHandlers } from './ipc.js';
