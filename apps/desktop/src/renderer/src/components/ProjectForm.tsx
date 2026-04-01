@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-
 import type { DesktopProjectDraft, Incident, ProjectSnapshot, RunUpdate } from '@pigeonclaw/shared';
 import { SectionHeader, StatusPill, SurfaceCard } from '@pigeonclaw/ui';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { makeProjectDraft } from '../../../shared/project-defaults.js';
 import { HistoryView } from './HistoryView.js';
@@ -120,7 +119,7 @@ export function ProjectForm({
 
     return [
       'body=\'{"source":"manual-test","error":{"message":"Sample incident","code":"E_TEST"}}\'',
-      `sig=$(printf '%s' \"$body\" | openssl dgst -sha256 -hmac '${project.signingSecret}' | sed 's/^.* //')`,
+      `sig=$(printf '%s' "$body" | openssl dgst -sha256 -hmac '${project.signingSecret}' | sed 's/^.* //')`,
       `curl -X POST '${project.webhookUrl}' \\`,
       "  -H 'content-type: application/json' \\",
       '  -H "x-pigeonclaw-signature: $sig" \\',

@@ -121,8 +121,8 @@ export const webhookEventSchema = z.object({
   receivedAt: z.string().datetime(),
   externalEventId: z.string().max(200).optional(),
   idempotencyKey: z.string().max(200).optional(),
-  payload: z.record(z.unknown()),
-  headers: z.record(z.string()),
+  payload: z.record(z.string(), z.unknown()),
+  headers: z.record(z.string(), z.string()),
 });
 
 export const incidentStatusSchema = z.enum(['queued', 'running', 'succeeded', 'failed']);
@@ -144,7 +144,7 @@ export const jobSchema = z.object({
   projectId: idSchema,
   deliveredToDeviceId: idSchema,
   queuedAt: z.string().datetime(),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   fingerprint: z.string(),
   duplicateCount: z.number().int().min(0),
 });

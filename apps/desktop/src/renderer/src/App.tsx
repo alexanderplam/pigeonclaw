@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-
 import type { DesktopProjectDraft, Incident, ProjectSnapshot, RunUpdate } from '@pigeonclaw/shared';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ProjectForm } from './components/ProjectForm.js';
 import { SettingsModal } from './components/SettingsModal.js';

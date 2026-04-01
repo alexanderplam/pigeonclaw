@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
-
 import { SectionHeader, StatusPill, SurfaceCard } from '@pigeonclaw/ui';
+import { useEffect, useState } from 'react';
 
 export function SettingsModal({
   isOpen,

@@ -1,6 +1,5 @@
-import { useState } from 'react';
-
 import { SectionHeader, SurfaceCard } from '@pigeonclaw/ui';
+import { useState } from 'react';
 
 export function SetupView({
   onPair,

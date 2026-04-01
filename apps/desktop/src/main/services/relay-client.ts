@@ -3,11 +3,11 @@ import { EventEmitter } from 'node:events';
 import {
   type DesktopPairRequest,
   type DesktopProjectDraft,
+  desktopPairResponseSchema,
   type Incident,
+  incidentSchema,
   type Job,
   type RunUpdate,
-  desktopPairResponseSchema,
-  incidentSchema,
   relayEnvelopeSchema,
   relayProjectCredentialsSchema,
   relayProjectSchema,

@@ -16,10 +16,10 @@
     "typecheck": "pnpm --filter @pigeonclaw/shared build && pnpm --filter @pigeonclaw/ui build && pnpm -r typecheck"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@types/node": "^20.17.46",
+    "@biomejs/biome": "^2.4.10",
+    "@types/node": "^25.5.0",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
