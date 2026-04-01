@@ -410,5 +410,9 @@ function mapIncidentStatus(status: string) {
     return status;
   }
 
+  if (status === 'cancelled') {
+    return 'succeeded';
+  }
+
   return 'failed';
 }

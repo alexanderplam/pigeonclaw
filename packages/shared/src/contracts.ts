@@ -56,6 +56,7 @@ export const desktopProjectSettingsSchema = z.object({
   projectId: idSchema,
   name: z.string().min(1).max(80),
   repoPath: z.string().min(1),
+  executionMode: z.enum(['auto', 'ask', 'log']).default('auto'),
   basePrompt: z.string().min(1),
   eventPromptTemplate: z.string().min(1),
   localRules: z.array(z.string().min(1).max(240)).max(20).default([]),
@@ -75,6 +76,7 @@ export const desktopProjectDraftSchema = z.object({
     .max(80)
     .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with dashes'),
   repoPath: z.string().min(1),
+  executionMode: z.enum(['auto', 'ask', 'log']).default('auto'),
   basePrompt: z.string().min(1),
   eventPromptTemplate: z.string().min(1),
   localRules: z.array(z.string().min(1).max(240)).max(20).default([]),
@@ -95,6 +97,7 @@ export const projectSnapshotSchema = z.object({
   name: z.string().min(1).max(80),
   slug: z.string().min(1).max(80),
   repoPath: z.string().min(1),
+  executionMode: z.enum(['auto', 'ask', 'log']).default('auto'),
   basePrompt: z.string().min(1),
   eventPromptTemplate: z.string().min(1),
   localRules: z.array(z.string()),

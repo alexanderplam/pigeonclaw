@@ -140,9 +140,9 @@ export default function App() {
       <main className="workspace">
         <StatusBar
           relayStatus={setupState.relayStatus}
-          deviceName={setupState.deviceName}
           projectName={selectedProject?.name}
           repoPath={selectedProject?.repoPath}
+          runtimeReady={Boolean(setupState.relayBaseUrl && setupState.codexPath)}
           onOpenSettings={() => setSettingsOpen(true)}
         />
 
@@ -154,6 +154,7 @@ export default function App() {
             hasProjects={projects.length > 0}
             createFromFolderError={projectActionError}
             onCreateFromFolder={handleCreateProjectFromFolder}
+            relayStatus={setupState.relayStatus}
             onSave={async (draft: DesktopProjectDraft) => {
               const saved = await window.pigeonclaw.saveProject(draft);
               await refreshAll();

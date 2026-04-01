@@ -1,6 +1,8 @@
 import type { ProjectSnapshot } from '@pigeonclaw/shared';
 import { StatusPill, SurfaceCard } from '@pigeonclaw/ui';
 
+import { getExecutionModeLabel } from './runtime-utils.js';
+
 export function Sidebar({
   projects,
   selectedProjectId,
@@ -16,11 +18,11 @@ export function Sidebar({
     <aside className="sidebar">
       <div className="sidebar-header">
         <div>
-          <span className="sidebar-eyebrow">Local Agent Control</span>
+          <span className="sidebar-eyebrow">Agent runtime</span>
           <h1>PigeonClaw</h1>
         </div>
         <button className="ghost-button" type="button" onClick={onCreateProject}>
-          Add Folder
+          Add Project
         </button>
       </div>
 
@@ -40,20 +42,30 @@ export function Sidebar({
               }
               onClick={() => onSelectProject(project.projectId)}
             >
-              <div>
+              <div className="project-item-copy">
                 <strong>{project.name}</strong>
-                <span>{project.slug}</span>
+                <div className="project-item-meta">
+                  <span>{project.slug}</span>
+                  <span className="project-mode-label">
+                    {getExecutionModeLabel(project.executionMode, 'short')}
+                  </span>
+                </div>
               </div>
-              <StatusPill tone={project.enabled ? 'success' : 'warning'}>
-                {project.enabled ? 'Ready' : 'Paused'}
-              </StatusPill>
+
+              <span className="project-live-state">
+                <span
+                  className={project.enabled ? 'project-status-dot is-live' : 'project-status-dot'}
+                  aria-hidden="true"
+                />
+                <span>{project.enabled ? 'Live' : 'Paused'}</span>
+              </span>
             </button>
           ))}
 
           {projects.length === 0 ? (
             <div className="empty-state">
               <strong>No projects yet</strong>
-              <p>Choose a local repository folder to get a webhook URL and local Codex workflow.</p>
+              <p>Choose a local repository to issue a webhook and light up the runtime.</p>
             </div>
           ) : null}
         </div>

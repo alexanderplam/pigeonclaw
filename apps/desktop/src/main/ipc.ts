@@ -84,6 +84,7 @@ export function registerIpcHandlers(input: {
         name: draft.name,
         slug: draft.slug,
         repoPath: draft.repoPath,
+        executionMode: draft.executionMode,
         basePrompt: draft.basePrompt,
         eventPromptTemplate: draft.eventPromptTemplate,
         localRules: draft.localRules,
@@ -111,6 +112,7 @@ export function registerIpcHandlers(input: {
       name: draft.name,
       slug: draft.slug,
       repoPath: draft.repoPath,
+      executionMode: draft.executionMode,
       basePrompt: draft.basePrompt,
       eventPromptTemplate: draft.eventPromptTemplate,
       localRules: draft.localRules,
@@ -176,6 +178,7 @@ export function registerIpcHandlers(input: {
       name: draft.name,
       slug: draft.slug,
       repoPath: draft.repoPath,
+      executionMode: draft.executionMode,
       basePrompt: draft.basePrompt,
       eventPromptTemplate: draft.eventPromptTemplate,
       localRules: draft.localRules,
@@ -233,6 +236,7 @@ function mergeProjects(
       name: local?.name ?? remoteProject.name,
       slug: local?.slug ?? remoteProject.slug,
       repoPath: local?.repoPath ?? '',
+      executionMode: local?.executionMode ?? 'auto',
       basePrompt:
         local?.basePrompt ??
         'You are responding to an incoming event. Investigate the repository, determine the safest next step, and make minimal changes if warranted.',

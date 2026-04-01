@@ -3,96 +3,54 @@ import { useMemo, useState } from 'react';
 import type { Incident, ProjectSnapshot, RunUpdate } from '@pigeonclaw/shared';
 import { SectionHeader, StatusPill, SurfaceCard } from '@pigeonclaw/ui';
 
-type ActivityFilter = 'all' | 'incidents' | 'runs' | 'failures';
+import { buildTimelineItems, formatDateTime, formatRelativeTime } from './runtime-utils.js';
 
-type ActivityItem =
-  | {
-      id: string;
-      kind: 'incident';
-      status: Incident['status'];
-      timestamp: string;
-      title: string;
-      body: string;
-      meta: string;
-    }
-  | {
-      id: string;
-      kind: 'run';
-      status: RunUpdate['status'];
-      timestamp: string;
-      title: string;
-      body: string;
-      meta: string;
-    };
+type ActivityFilter = 'all' | 'events' | 'runs' | 'failures';
 
 export function HistoryView({
   project,
   incidents,
   runs,
+  onOpenWebhook,
 }: {
   project: ProjectSnapshot | null;
   incidents: Incident[];
   runs: RunUpdate[];
+  onOpenWebhook: () => void;
 }) {
   const [filter, setFilter] = useState<ActivityFilter>('all');
 
   const activityItems = useMemo(() => {
-    const scopedIncidents = project
-      ? incidents.filter((incident) => incident.projectId === project.projectId)
-      : incidents;
-    const scopedRuns = project ? runs.filter((run) => run.projectId === project.projectId) : runs;
-
-    const normalized: ActivityItem[] = [
-      ...scopedIncidents.map((incident) => ({
-        id: incident.id,
-        kind: 'incident' as const,
-        status: incident.status,
-        timestamp: incident.lastSeenAt,
-        title: `Incident ${incident.id.slice(0, 8)}`,
-        body: incident.latestPayloadPreview,
-        meta: `${incident.duplicateCount} duplicate${incident.duplicateCount === 1 ? '' : 's'}`,
-      })),
-      ...scopedRuns.map((run) => ({
-        id: run.runId,
-        kind: 'run' as const,
-        status: run.status,
-        timestamp: run.updatedAt,
-        title: `Run ${run.runId.slice(0, 8)}`,
-        body: run.summary ?? 'Codex is still working on this run.',
-        meta: run.exitCode !== undefined ? `Exit code ${run.exitCode}` : 'Execution in progress',
-      })),
-    ].sort(
-      (left, right) => new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime(),
-    );
+    const normalized = buildTimelineItems({ project, incidents, runs });
 
     if (filter === 'all') {
       return normalized;
     }
 
-    if (filter === 'incidents') {
-      return normalized.filter((item) => item.kind === 'incident');
+    if (filter === 'events') {
+      return normalized.filter((item) => item.category === 'event');
     }
 
     if (filter === 'runs') {
-      return normalized.filter((item) => item.kind === 'run');
+      return normalized.filter((item) => item.category === 'run');
     }
 
-    return normalized.filter((item) => item.status === 'failed' || item.status === 'cancelled');
+    return normalized.filter((item) => item.tone === 'danger');
   }, [filter, incidents, project, runs]);
 
   return (
     <SurfaceCard className="activity-panel">
       <div className="activity-header">
         <SectionHeader
-          title="Activity"
-          subtitle="One timeline for webhook incidents and local Codex runs."
+          title="Activity timeline"
+          subtitle="A live stream of intake, dedupe, incident creation, and local Codex outcomes."
         />
 
         <div className="activity-filters" role="tablist" aria-label="Activity filters">
           {(
             [
               ['all', 'All'],
-              ['incidents', 'Incidents'],
+              ['events', 'Events'],
               ['runs', 'Runs'],
               ['failures', 'Failures'],
             ] satisfies Array<[ActivityFilter, string]>
@@ -109,59 +67,50 @@ export function HistoryView({
         </div>
       </div>
 
-      <div className="activity-list">
+      <div className="timeline">
         {activityItems.map((item) => (
-          <article key={`${item.kind}-${item.id}`} className="activity-item">
-            <div className="activity-item-topline">
-              <div className="activity-item-title">
-                <span className="activity-kind">{item.kind}</span>
-                <strong>{item.title}</strong>
-              </div>
-              <StatusPill tone={statusTone(item.status)}>{item.status}</StatusPill>
+          <article key={item.id} className="timeline-item">
+            <div className="timeline-rail">
+              <span className={`timeline-dot timeline-dot--${item.tone}`} aria-hidden="true" />
             </div>
 
-            <p>{item.body}</p>
+            <div className="timeline-card">
+              <div className="timeline-topline">
+                <div className="timeline-title">
+                  <span className="summary-label">{item.label}</span>
+                  <strong>{item.title}</strong>
+                </div>
+                <StatusPill tone={item.tone}>{item.category}</StatusPill>
+              </div>
 
-            <small>
-              {formatDate(item.timestamp)} • {item.meta}
-            </small>
+              <p>{item.body}</p>
+
+              <small>
+                {formatDateTime(item.timestamp)} • {formatRelativeTime(item.timestamp)} •{' '}
+                {item.meta}
+              </small>
+            </div>
           </article>
         ))}
 
         {activityItems.length === 0 ? (
-          <div className="empty-state empty-state-large">
-            <strong>No activity yet</strong>
+          <div className="empty-state empty-state-large timeline-empty">
+            <strong>No runtime activity yet</strong>
             <p>
-              Incoming webhook events and local Codex runs will appear here as a single timeline.
+              Send a test event to watch the timeline fill in from webhook intake through local
+              agent outcomes.
             </p>
+            <div className="inline-actions">
+              <button className="primary-button" type="button" onClick={onOpenWebhook}>
+                Send test event
+              </button>
+              <button className="ghost-button" type="button" onClick={onOpenWebhook}>
+                Go to Webhook tab
+              </button>
+            </div>
           </div>
         ) : null}
       </div>
     </SurfaceCard>
   );
-}
-
-function statusTone(status: string) {
-  if (status === 'succeeded') {
-    return 'success';
-  }
-
-  if (status === 'failed' || status === 'cancelled') {
-    return 'danger';
-  }
-
-  if (status === 'queued') {
-    return 'warning';
-  }
-
-  return 'neutral';
-}
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(value));
 }

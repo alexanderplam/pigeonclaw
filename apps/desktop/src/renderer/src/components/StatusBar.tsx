@@ -2,15 +2,15 @@ import { StatusPill } from '@pigeonclaw/ui';
 
 export function StatusBar({
   relayStatus,
-  deviceName,
   projectName,
   repoPath,
+  runtimeReady,
   onOpenSettings,
 }: {
   relayStatus: string;
-  deviceName?: string | null;
   projectName?: string | null;
   repoPath?: string | null;
+  runtimeReady: boolean;
   onOpenSettings: () => void;
 }) {
   return (
@@ -31,20 +31,17 @@ export function StatusBar({
             Relay {relayStatus}
           </StatusPill>
         </div>
-        <p>{repoPath ?? 'Choose a local repository to create a project and issue a webhook.'}</p>
+        <p>{repoPath ?? 'Choose a local repository to open a project runtime.'}</p>
       </div>
 
       <div className="toolbar-meta">
-        <div className="toolbar-device">
-          <span className="toolbar-device-label">Device</span>
-          <strong>{deviceName ?? 'Unpaired Mac'}</strong>
-        </div>
+        {runtimeReady ? <span className="runtime-ready-indicator">Runtime ready</span> : null}
         <button
           className="ghost-button toolbar-settings-button"
           type="button"
           onClick={onOpenSettings}
         >
-          Settings
+          Desktop settings
         </button>
       </div>
     </header>

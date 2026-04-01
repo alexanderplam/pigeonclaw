@@ -24,6 +24,7 @@ type ProjectRow = {
   name: string;
   slug: string;
   repo_path: string;
+  execution_mode: ProjectSnapshot['executionMode'];
   base_prompt: string;
   event_prompt_template: string;
   local_rules: string;
@@ -101,6 +102,7 @@ export class LocalStore {
         name: row.name,
         slug: row.slug,
         repoPath: row.repo_path,
+        executionMode: row.execution_mode ?? 'auto',
         basePrompt: row.base_prompt,
         eventPromptTemplate: row.event_prompt_template,
         localRules: JSON.parse(String(row.local_rules)),
@@ -137,6 +139,7 @@ export class LocalStore {
           name,
           slug,
           repo_path,
+          execution_mode,
           base_prompt,
           event_prompt_template,
           local_rules,
@@ -154,11 +157,12 @@ export class LocalStore {
           created_at,
           updated_at
         )
-        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, coalesce((select created_at from projects where project_id = ?), ?), ?)
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, coalesce((select created_at from projects where project_id = ?), ?), ?)
         on conflict(project_id) do update set
           name = excluded.name,
           slug = excluded.slug,
           repo_path = excluded.repo_path,
+          execution_mode = excluded.execution_mode,
           base_prompt = excluded.base_prompt,
           event_prompt_template = excluded.event_prompt_template,
           local_rules = excluded.local_rules,
@@ -180,6 +184,7 @@ export class LocalStore {
         parsed.name,
         parsed.slug,
         parsed.repoPath,
+        parsed.executionMode,
         parsed.basePrompt,
         parsed.eventPromptTemplate,
         JSON.stringify(parsed.localRules),
@@ -276,6 +281,7 @@ export class LocalStore {
         name text not null,
         slug text not null,
         repo_path text not null,
+        execution_mode text not null default 'auto',
         base_prompt text not null,
         event_prompt_template text not null,
         local_rules text not null,
@@ -307,6 +313,8 @@ export class LocalStore {
         updated_at text not null
       );
     `);
+
+    this.ensureColumn('projects', 'execution_mode', "text not null default 'auto'");
   }
 
   private encodeSecret(value: string) {
@@ -338,5 +346,14 @@ export class LocalStore {
       exitCode: row.exit_code ?? undefined,
       updatedAt: row.updated_at,
     };
+  }
+
+  private ensureColumn(table: string, column: string, definition: string) {
+    const rows = this.db.prepare(`pragma table_info(${table})`).all() as Array<{ name: string }>;
+    if (rows.some((row) => row.name === column)) {
+      return;
+    }
+
+    this.db.exec(`alter table ${table} add column ${column} ${definition}`);
   }
 }

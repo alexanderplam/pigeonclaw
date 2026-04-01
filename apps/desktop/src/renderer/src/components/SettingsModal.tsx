@@ -52,7 +52,7 @@ export function SettingsModal({
         <div className="settings-modal-header">
           <SectionHeader
             title="Desktop settings"
-            subtitle="Global runtime settings for this Mac stay here instead of on each project."
+            subtitle="Global runtime settings for this machine. They apply across projects and stay separate from project configuration."
             className="settings-modal-heading"
           />
           <button className="ghost-button" type="button" onClick={onClose}>
@@ -60,19 +60,26 @@ export function SettingsModal({
           </button>
         </div>
 
-        <div className="settings-summary-row">
-          <StatusPill
-            tone={
-              relayStatus === 'connected'
-                ? 'success'
-                : relayStatus === 'error'
-                  ? 'danger'
-                  : 'warning'
-            }
-          >
-            Relay {relayStatus}
-          </StatusPill>
-          <span>{deviceName ?? 'Unpaired Mac'}</span>
+        <div className="settings-runtime-card">
+          <div className="settings-summary-row">
+            <StatusPill
+              tone={
+                relayStatus === 'connected'
+                  ? 'success'
+                  : relayStatus === 'error'
+                    ? 'danger'
+                    : 'warning'
+              }
+            >
+              Relay {relayStatus}
+            </StatusPill>
+            <span>This machine: {deviceName ?? 'Unpaired Mac'}</span>
+          </div>
+
+          <p>
+            Use this modal for machine-wide runtime defaults such as the Codex binary, shared
+            concurrency, and the paired relay endpoint.
+          </p>
         </div>
 
         <form
@@ -97,31 +104,47 @@ export function SettingsModal({
             }
           }}
         >
-          <div className="settings-grid">
-            <label className="field">
-              <span>Codex path</span>
-              <input
-                value={draftCodexPath}
-                onChange={(event) => setDraftCodexPath(event.target.value)}
-              />
-            </label>
+          <SurfaceCard className="settings-section-card">
+            <SectionHeader
+              title="Runtime defaults"
+              subtitle="These values shape how this Mac launches Codex across all projects."
+            />
 
-            <label className="field">
-              <span>Global concurrency</span>
-              <input
-                type="number"
-                min={1}
-                max={8}
-                value={draftConcurrency}
-                onChange={(event) => setDraftConcurrency(Number(event.target.value || 2))}
-              />
-            </label>
-          </div>
+            <div className="settings-grid">
+              <label className="field">
+                <span>Codex path</span>
+                <input
+                  value={draftCodexPath}
+                  onChange={(event) => setDraftCodexPath(event.target.value)}
+                />
+              </label>
 
-          <div className="field">
-            <span>Relay base URL</span>
-            <code>{relayBaseUrl ?? 'Not paired yet'}</code>
-          </div>
+              <label className="field">
+                <span>Global concurrency</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={8}
+                  value={draftConcurrency}
+                  onChange={(event) => setDraftConcurrency(Number(event.target.value || 2))}
+                />
+              </label>
+            </div>
+          </SurfaceCard>
+
+          <SurfaceCard className="settings-section-card">
+            <SectionHeader
+              title="Relay connection"
+              subtitle="This paired endpoint is read-only here so it does not compete with project settings."
+            />
+
+            <div className="value-row value-row--stacked">
+              <div>
+                <span className="summary-label">Relay base URL</span>
+                <code>{relayBaseUrl ?? 'Not paired yet'}</code>
+              </div>
+            </div>
+          </SurfaceCard>
 
           {error ? <p className="form-error">{error}</p> : null}
 
@@ -130,7 +153,7 @@ export function SettingsModal({
               Cancel
             </button>
             <button className="primary-button" type="submit" disabled={submitting}>
-              {submitting ? 'Saving…' : 'Save settings'}
+              {submitting ? 'Saving…' : 'Save desktop settings'}
             </button>
           </div>
         </form>

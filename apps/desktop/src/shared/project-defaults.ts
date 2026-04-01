@@ -17,6 +17,7 @@ export function makeProjectDraft(
     name: overrides.name ?? project?.name ?? '',
     slug: overrides.slug ?? project?.slug ?? '',
     repoPath: overrides.repoPath ?? project?.repoPath ?? '',
+    executionMode: overrides.executionMode ?? project?.executionMode ?? 'auto',
     basePrompt: overrides.basePrompt ?? project?.basePrompt ?? defaultBasePrompt,
     eventPromptTemplate:
       overrides.eventPromptTemplate ?? project?.eventPromptTemplate ?? defaultEventPrompt,

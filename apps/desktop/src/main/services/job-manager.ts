@@ -25,7 +25,43 @@ export class JobManager {
 
   async enqueue(job: Job) {
     const existing = this.store.getRun(job.id);
-    if (existing && ['queued', 'running', 'succeeded'].includes(existing.status)) {
+    if (existing && ['queued', 'running', 'succeeded', 'cancelled'].includes(existing.status)) {
+      return;
+    }
+
+    const project = this.store.getProject(job.projectId);
+    if (!project) {
+      await this.failMissingProject(job);
+      return;
+    }
+
+    if (project.executionMode === 'log') {
+      await this.skipRun(job, 'Execution mode is Log only on this machine.');
+      return;
+    }
+
+    const queuedUpdate = {
+      runId: job.id,
+      incidentId: job.incidentId,
+      projectId: job.projectId,
+      status: 'queued' as const,
+      summary:
+        project.executionMode === 'ask'
+          ? 'Waiting for approval before starting Codex.'
+          : 'Queued for execution on this machine.',
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.store.upsertRun(queuedUpdate);
+    await this.relayClient.sendRunUpdate(job.id, {
+      incidentId: queuedUpdate.incidentId,
+      projectId: queuedUpdate.projectId,
+      status: queuedUpdate.status,
+      summary: queuedUpdate.summary,
+      updatedAt: queuedUpdate.updatedAt,
+    });
+
+    if (project.executionMode === 'ask') {
       return;
     }
 
@@ -41,7 +77,12 @@ export class JobManager {
 
     const nextIndex = this.queued.findIndex((job) => {
       const project = this.store.getProject(job.projectId);
-      if (!project || !project.enabled || this.activeIncidents.has(job.incidentId)) {
+      if (
+        !project ||
+        !project.enabled ||
+        project.executionMode !== 'auto' ||
+        this.activeIncidents.has(job.incidentId)
+      ) {
         return false;
       }
 
@@ -147,6 +188,26 @@ export class JobManager {
       projectId: job.projectId,
       status: 'failed' as const,
       summary: 'No local project is configured for this relay project.',
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.store.upsertRun(update);
+    await this.relayClient.sendRunUpdate(job.id, {
+      incidentId: update.incidentId,
+      projectId: update.projectId,
+      status: update.status,
+      summary: update.summary,
+      updatedAt: update.updatedAt,
+    });
+  }
+
+  private async skipRun(job: Job, summary: string) {
+    const update = {
+      runId: job.id,
+      incidentId: job.incidentId,
+      projectId: job.projectId,
+      status: 'cancelled' as const,
+      summary,
       updatedAt: new Date().toISOString(),
     };
 
