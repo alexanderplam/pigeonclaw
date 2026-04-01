@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 
 import type { DatabaseClient } from '../db.js';
-import { authorizeDevice } from '../services/auth.js';
+import { authorizeDevice, isUnauthorizedError } from '../services/auth.js';
 import type { DeviceHub } from '../services/device-hub.js';
 import { deliverQueuedJobs } from '../services/incidents.js';
 
@@ -35,8 +35,14 @@ export async function registerDeviceSocketRoutes(
         connection.on('close', () => {
           input.hub.unregister(device.id, connection);
         });
-      } catch {
-        connection.close(4001, 'Unauthorized');
+      } catch (error) {
+        if (isUnauthorizedError(error)) {
+          connection.close(4001, 'Unauthorized');
+          return;
+        }
+
+        request.log.error({ err: error }, 'Failed to establish device socket');
+        connection.close(1011, 'Internal relay error');
       }
     },
   );

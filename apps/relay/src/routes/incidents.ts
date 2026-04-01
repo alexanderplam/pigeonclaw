@@ -2,7 +2,7 @@ import { incidentSchema } from '@pigeonclaw/shared';
 import type { FastifyInstance } from 'fastify';
 
 import type { DatabaseClient } from '../db.js';
-import { authorizeDevice } from '../services/auth.js';
+import { authorizeDevice, isUnauthorizedError } from '../services/auth.js';
 import { listIncidentsForDevice } from '../services/incidents.js';
 
 export async function registerIncidentRoutes(app: FastifyInstance, input: { sql: DatabaseClient }) {
@@ -28,8 +28,13 @@ export async function registerIncidentRoutes(app: FastifyInstance, input: { sql:
           }),
         ),
       };
-    } catch {
-      return reply.code(401).send({ error: 'Unauthorized' });
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        return reply.code(401).send({ error: 'Unauthorized' });
+      }
+
+      request.log.error({ err: error }, 'Failed to list incidents');
+      return reply.code(500).send({ error: 'Failed to list incidents' });
     }
   });
 }

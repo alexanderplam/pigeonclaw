@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 
 import type { RelayConfig } from '../config.js';
 import type { DatabaseClient } from '../db.js';
-import { authorizeDevice } from '../services/auth.js';
+import { authorizeDevice, isUnauthorizedError } from '../services/auth.js';
 import { createProject, listProjects, updateProject } from '../services/projects.js';
 
 export async function registerProjectRoutes(
@@ -24,8 +24,13 @@ export async function registerProjectRoutes(
       });
 
       return { projects };
-    } catch {
-      return reply.code(401).send({ error: 'Unauthorized' });
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        return reply.code(401).send({ error: 'Unauthorized' });
+      }
+
+      request.log.error({ err: error }, 'Failed to list projects');
+      return reply.code(500).send({ error: 'Failed to list projects' });
     }
   });
 
@@ -41,9 +46,9 @@ export async function registerProjectRoutes(
 
       return reply.code(201).send(result);
     } catch (error) {
-      return reply
-        .code(400)
-        .send({ error: error instanceof Error ? error.message : 'Invalid request' });
+      const message = error instanceof Error ? error.message : 'Invalid request';
+      const statusCode = isUnauthorizedError(error) ? 401 : 400;
+      return reply.code(statusCode).send({ error: statusCode === 401 ? 'Unauthorized' : message });
     }
   });
 
@@ -60,8 +65,8 @@ export async function registerProjectRoutes(
       return reply.send(result);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Invalid request';
-      const statusCode = message === 'Invalid device token' ? 401 : 400;
-      return reply.code(statusCode).send({ error: message });
+      const statusCode = isUnauthorizedError(error) ? 401 : 400;
+      return reply.code(statusCode).send({ error: statusCode === 401 ? 'Unauthorized' : message });
     }
   });
 }

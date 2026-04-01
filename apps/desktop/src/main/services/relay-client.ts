@@ -203,7 +203,13 @@ export class RelayClient extends EventEmitter<{
     });
 
     if (!response.ok) {
-      throw new Error(`Relay request failed: ${response.status}`);
+      const responseBody = await response.text();
+      const message = extractRelayError(responseBody);
+      throw new Error(
+        message
+          ? `Relay request failed: ${response.status} ${message}`
+          : `Relay request failed: ${response.status}`,
+      );
     }
 
     return response.json() as Promise<Record<string, unknown>>;
@@ -227,4 +233,17 @@ export class RelayClient extends EventEmitter<{
 
 function trimTrailingSlash(value: string) {
   return value.replace(/\/$/, '');
+}
+
+function extractRelayError(body: string) {
+  if (!body) {
+    return '';
+  }
+
+  try {
+    const parsed = JSON.parse(body) as { error?: unknown };
+    return typeof parsed.error === 'string' ? parsed.error : body;
+  } catch {
+    return body;
+  }
 }

@@ -42,6 +42,15 @@ export async function authorizeDevice(
   return device;
 }
 
+export function isUnauthorizedError(error: unknown) {
+  const message = error instanceof Error ? error.message : '';
+  return (
+    message === 'Missing bearer token' ||
+    message === 'Invalid device token' ||
+    message === 'Unauthorized bootstrap token'
+  );
+}
+
 function extractBearerToken(authorizationHeader: string | undefined) {
   if (!authorizationHeader) {
     return null;

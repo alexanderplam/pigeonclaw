@@ -2,7 +2,7 @@ import { runUpdateSchema } from '@pigeonclaw/shared';
 import type { FastifyInstance } from 'fastify';
 
 import type { DatabaseClient } from '../db.js';
-import { authorizeDevice } from '../services/auth.js';
+import { authorizeDevice, isUnauthorizedError } from '../services/auth.js';
 import { recordRunUpdate } from '../services/incidents.js';
 
 export async function registerRunRoutes(app: FastifyInstance, input: { sql: DatabaseClient }) {
@@ -19,8 +19,8 @@ export async function registerRunRoutes(app: FastifyInstance, input: { sql: Data
       return reply.code(202).send({ accepted: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Invalid request';
-      const statusCode = message === 'Invalid device token' ? 401 : 400;
-      return reply.code(statusCode).send({ error: message });
+      const statusCode = isUnauthorizedError(error) ? 401 : 400;
+      return reply.code(statusCode).send({ error: statusCode === 401 ? 'Unauthorized' : message });
     }
   });
 }
