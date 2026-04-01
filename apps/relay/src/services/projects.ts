@@ -12,6 +12,7 @@ import {
 import type { RelayConfig } from '../config.js';
 import type { DatabaseClient } from '../db.js';
 import { decryptSecret, encryptSecret, generateOpaqueToken, hashValue } from './crypto.js';
+import { toIsoDateTime } from './date-time.js';
 
 type ProjectRecord = {
   id: string;
@@ -26,8 +27,8 @@ type ProjectRecord = {
   webhook_token_preview: string;
   signing_secret_ciphertext?: string | null;
   signing_secret_preview?: string | null;
-  created_at: string;
-  updated_at: string;
+  created_at: string | Date;
+  updated_at: string | Date;
 };
 
 export async function ensurePrimaryTenant(sql: DatabaseClient) {
@@ -99,8 +100,8 @@ export async function listProjects(
         decryptSecret(record.webhook_token_ciphertext, input.encryptionKey),
       ),
       webhookTokenPreview: record.webhook_token_preview,
-      createdAt: record.created_at,
-      updatedAt: record.updated_at,
+      createdAt: toIsoDateTime(record.created_at),
+      updatedAt: toIsoDateTime(record.updated_at),
     }),
   );
 }

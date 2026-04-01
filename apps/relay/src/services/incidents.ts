@@ -24,8 +24,8 @@ type ProjectLookup = {
 type IncidentRecord = {
   id: string;
   status: 'queued' | 'running' | 'succeeded' | 'failed';
-  first_seen_at: string;
-  last_seen_at: string;
+  first_seen_at: string | Date;
+  last_seen_at: string | Date;
   duplicate_count: number;
 };
 
@@ -331,8 +331,8 @@ export async function listIncidentsForDevice(
       project_id: string;
       fingerprint: string;
       status: 'queued' | 'running' | 'succeeded' | 'failed';
-      first_seen_at: string;
-      last_seen_at: string;
+      first_seen_at: string | Date;
+      last_seen_at: string | Date;
       duplicate_count: number;
       latest_payload_preview: string;
     }[]

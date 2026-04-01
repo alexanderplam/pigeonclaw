@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 
 import type { DatabaseClient } from '../db.js';
 import { authorizeDevice, isUnauthorizedError } from '../services/auth.js';
+import { toIsoDateTime } from '../services/date-time.js';
 import { listIncidentsForDevice } from '../services/incidents.js';
 
 export async function registerIncidentRoutes(app: FastifyInstance, input: { sql: DatabaseClient }) {
@@ -21,8 +22,8 @@ export async function registerIncidentRoutes(app: FastifyInstance, input: { sql:
             projectId: incident.project_id,
             fingerprint: incident.fingerprint,
             status: incident.status,
-            firstSeenAt: incident.first_seen_at,
-            lastSeenAt: incident.last_seen_at,
+            firstSeenAt: toIsoDateTime(incident.first_seen_at),
+            lastSeenAt: toIsoDateTime(incident.last_seen_at),
             duplicateCount: incident.duplicate_count,
             latestPayloadPreview: incident.latest_payload_preview,
           }),
