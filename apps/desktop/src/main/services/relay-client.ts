@@ -87,36 +87,65 @@ export class RelayClient extends EventEmitter<{
       return;
     }
 
+    if (
+      this.socket &&
+      (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)
+    ) {
+      return;
+    }
+
     this.setStatus('connecting');
 
     const socketUrl = `${trimTrailingSlash(state.relayBaseUrl).replace(/^http/, 'ws')}/v1/devices/connect`;
-    this.socket = new WebSocket(socketUrl, {
+    const socket = new WebSocket(socketUrl, {
       headers: {
         Authorization: `Bearer ${deviceToken}`,
       },
     });
+    this.socket = socket;
 
-    this.socket.on('open', () => {
+    socket.on('open', () => {
+      if (this.socket !== socket) {
+        return;
+      }
+
+      this.clearReconnectTimer();
       this.setStatus('connected');
     });
 
-    this.socket.on('close', () => {
+    socket.on('close', () => {
+      if (this.socket === socket) {
+        this.socket = null;
+      }
+
       this.setStatus('disconnected');
       this.scheduleReconnect();
     });
 
-    this.socket.on('error', () => {
+    socket.on('error', () => {
+      if (this.socket === socket) {
+        this.socket = null;
+      }
+
       this.setStatus('error');
+      safelyDisposeSocket(socket);
+      this.scheduleReconnect();
     });
 
-    this.socket.on('message', (data) => {
+    socket.on('message', (data) => {
       try {
         const envelope = relayEnvelopeSchema.parse(JSON.parse(data.toString()));
         if (envelope.type === 'job.ready') {
           this.emit('job', envelope.payload);
         }
       } catch {
+        if (this.socket === socket) {
+          this.socket = null;
+        }
+
         this.setStatus('error');
+        safelyDisposeSocket(socket);
+        this.scheduleReconnect();
       }
     });
   }
@@ -216,13 +245,21 @@ export class RelayClient extends EventEmitter<{
   }
 
   private scheduleReconnect() {
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-    }
+    this.clearReconnectTimer();
 
     this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
       void this.connect();
     }, 2_500);
+  }
+
+  private clearReconnectTimer() {
+    if (!this.reconnectTimer) {
+      return;
+    }
+
+    clearTimeout(this.reconnectTimer);
+    this.reconnectTimer = null;
   }
 
   private setStatus(status: RelayStatus) {
@@ -246,4 +283,12 @@ function extractRelayError(body: string) {
   } catch {
     return body;
   }
+}
+
+function safelyDisposeSocket(socket: WebSocket) {
+  if (socket.readyState === WebSocket.CLOSING || socket.readyState === WebSocket.CLOSED) {
+    return;
+  }
+
+  socket.terminate();
 }
