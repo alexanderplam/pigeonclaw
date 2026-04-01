@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-
 import type { DesktopProjectDraft, ProjectSnapshot } from '@pigeonclaw/shared';
 import { SectionHeader, StatusPill, SurfaceCard } from '@pigeonclaw/ui';
+import { useEffect, useMemo, useState } from 'react';
 
 const defaultBasePrompt =
   'You are triaging a live development incident. Investigate the repository, use the event context carefully, avoid broad changes, and summarize the result clearly.';

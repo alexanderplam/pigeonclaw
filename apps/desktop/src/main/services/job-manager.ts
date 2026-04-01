@@ -1,4 +1,4 @@
-import type { Job, ProjectSnapshot } from '@pigeonclaw/shared';
+import type { Job } from '@pigeonclaw/shared';
 
 import type { LocalStore } from '../stores/local-store.js';
 import { runCodexJob } from './codex-runner.js';
@@ -41,7 +41,7 @@ export class JobManager {
 
     const nextIndex = this.queued.findIndex((job) => {
       const project = this.store.getProject(job.projectId);
-      if (!project || !project.enabled || this.activeIncidents.has(job.incidentId)) {
+      if (!project?.enabled || this.activeIncidents.has(job.incidentId)) {
         return false;
       }
 

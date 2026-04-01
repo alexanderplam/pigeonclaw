@@ -2,10 +2,8 @@ import { spawn } from 'node:child_process';
 import { createWriteStream, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { join } from 'node:path';
-
+import { buildCodexPrompt, type Job, type ProjectSnapshot } from '@pigeonclaw/shared';
 import { app } from 'electron';
-
-import { type Job, type ProjectSnapshot, buildCodexPrompt } from '@pigeonclaw/shared';
 
 export async function runCodexJob(input: {
   job: Job;

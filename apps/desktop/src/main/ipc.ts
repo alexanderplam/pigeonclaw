@@ -1,11 +1,10 @@
-import { ipcMain } from 'electron';
-
 import {
   type DesktopProjectDraft,
-  type ProjectSnapshot,
   desktopProjectDraftSchema,
+  type ProjectSnapshot,
   projectSnapshotSchema,
 } from '@pigeonclaw/shared';
+import { ipcMain } from 'electron';
 
 import type { RelayClient } from './services/relay-client.js';
 import type { LocalStore } from './stores/local-store.js';

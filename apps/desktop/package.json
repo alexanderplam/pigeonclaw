@@ -36,10 +36,14 @@
   "build": {
     "appId": "com.pigeonclaw.desktop",
     "productName": "PigeonClaw",
-    "files": ["out/**"],
+    "files": [
+      "out/**"
+    ],
     "mac": {
       "category": "public.app-category.developer-tools",
-      "target": ["dmg"]
+      "target": [
+        "dmg"
+      ]
     }
   }
 }

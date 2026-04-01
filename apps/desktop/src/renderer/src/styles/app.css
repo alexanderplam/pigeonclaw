@@ -116,7 +116,9 @@ code {
   border: 1px solid var(--pc-border-strong);
   padding: 0.85rem 1rem;
   cursor: pointer;
-  transition: background 140ms ease, border-color 140ms ease;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease;
 }
 
 .primary-button {

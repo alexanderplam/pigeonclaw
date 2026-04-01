@@ -25,7 +25,8 @@
 }
 
 body {
-  background: radial-gradient(circle at top left, rgba(89, 176, 255, 0.12), transparent 38%),
+  background:
+    radial-gradient(circle at top left, rgba(89, 176, 255, 0.12), transparent 38%),
     radial-gradient(circle at top right, rgba(95, 209, 165, 0.08), transparent 32%),
     linear-gradient(180deg, #0b0f18 0%, #090c13 100%);
   color: var(--pc-text);
