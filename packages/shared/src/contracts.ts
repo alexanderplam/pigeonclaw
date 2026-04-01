@@ -196,6 +196,7 @@ export const relayEnvelopeSchema = z.discriminatedUnion('type', [
 
 export type DesktopPairRequest = z.infer<typeof desktopPairRequestSchema>;
 export type DesktopPairResponse = z.infer<typeof desktopPairResponseSchema>;
+export type FingerprintField = z.infer<typeof fingerprintFieldSchema>;
 export type RelayProject = z.infer<typeof relayProjectSchema>;
 export type RelayProjectCreate = z.infer<typeof relayProjectCreateSchema>;
 export type RelayProjectUpdate = z.infer<typeof relayProjectUpdateSchema>;

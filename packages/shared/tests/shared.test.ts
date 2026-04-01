@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   buildCodexPrompt,
+  coerceFingerprintFields,
   fingerprintEvent,
   renderPromptTemplate,
   signPayload,
@@ -33,6 +34,41 @@ describe('fingerprintEvent', () => {
     );
 
     expect(first).toBe(second);
+  });
+
+  it('accepts a legacy single-field object shape', () => {
+    const payload = {
+      error: {
+        message: 'Queue timeout',
+      },
+    };
+
+    const fingerprint = fingerprintEvent('project-1', payload, {
+      path: 'error.message',
+    } as unknown as Array<{ path: string; label?: string }>);
+
+    const expected = fingerprintEvent('project-1', payload, [{ path: 'error.message' }]);
+    expect(fingerprint).toBe(expected);
+  });
+
+  it('falls back to the whole payload when fields are unusable', () => {
+    const payload = {
+      error: {
+        code: 'E_CONN',
+        message: 'Database unavailable',
+      },
+    };
+
+    const fingerprint = fingerprintEvent('project-1', payload, [] as Array<{ path: string }>);
+    const expected = fingerprintEvent('project-1', payload, [{ path: '$', label: 'Whole event' }]);
+
+    expect(fingerprint).toBe(expected);
+  });
+});
+
+describe('coerceFingerprintFields', () => {
+  it('wraps a single stored object into an array', () => {
+    expect(coerceFingerprintFields({ path: 'error.message' })).toEqual([{ path: 'error.message' }]);
   });
 });
 

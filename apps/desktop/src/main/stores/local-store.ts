@@ -1,6 +1,11 @@
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { type ProjectSnapshot, projectSnapshotSchema, type RunUpdate } from '@pigeonclaw/shared';
+import {
+  coerceFingerprintFields,
+  type ProjectSnapshot,
+  projectSnapshotSchema,
+  type RunUpdate,
+} from '@pigeonclaw/shared';
 import Database from 'better-sqlite3';
 import { safeStorage } from 'electron';
 
@@ -108,7 +113,7 @@ export class LocalStore {
         concurrencyLimit: row.concurrency_limit,
         sandboxMode: row.sandbox_mode,
         cooldownSeconds: row.cooldown_seconds,
-        fingerprintFields: JSON.parse(String(row.fingerprint_fields)),
+        fingerprintFields: coerceFingerprintFields(JSON.parse(String(row.fingerprint_fields))),
         eventIdPath: row.event_id_path ?? undefined,
         enabled: Boolean(row.enabled),
         webhookUrl: row.webhook_url,

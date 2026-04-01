@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
 import {
+  coerceFingerprintFields,
+  type FingerprintField,
   relayProjectCreateSchema,
   relayProjectSchema,
   relayProjectUpdateSchema,
@@ -18,7 +20,7 @@ type ProjectRecord = {
   slug: string;
   enabled: boolean;
   cooldown_seconds: number;
-  fingerprint_fields: Array<{ path: string; label?: string }>;
+  fingerprint_fields: unknown;
   event_id_path?: string | null;
   webhook_token_ciphertext: string;
   webhook_token_preview: string;
@@ -89,7 +91,7 @@ export async function listProjects(
       slug: record.slug,
       enabled: record.enabled,
       cooldownSeconds: record.cooldown_seconds,
-      fingerprintFields: record.fingerprint_fields,
+      fingerprintFields: coerceFingerprintFields(record.fingerprint_fields),
       eventIdPath: record.event_id_path ?? undefined,
       signingSecretHint: record.signing_secret_preview ?? undefined,
       webhookUrl: buildWebhookUrl(
@@ -213,7 +215,9 @@ export async function updateProject(
       slug = ${parsed.slug ?? current.slug},
       enabled = ${parsed.enabled ?? current.enabled},
       cooldown_seconds = ${parsed.cooldownSeconds ?? current.cooldown_seconds},
-      fingerprint_fields = ${JSON.stringify(parsed.fingerprintFields ?? current.fingerprint_fields)}::jsonb,
+      fingerprint_fields = ${JSON.stringify(
+        parsed.fingerprintFields ?? coerceFingerprintFields(current.fingerprint_fields),
+      )}::jsonb,
       event_id_path = ${parsed.eventIdPath ?? current.event_id_path ?? null},
       signing_secret_ciphertext = ${
         nextSigningSecret
@@ -242,7 +246,14 @@ export async function findProjectByWebhookToken(sql: DatabaseClient, token: stri
     limit 1
   `;
 
-  return project ?? null;
+  return project
+    ? ({
+        ...project,
+        fingerprint_fields: coerceFingerprintFields(project.fingerprint_fields),
+      } satisfies Omit<ProjectRecord, 'fingerprint_fields'> & {
+        fingerprint_fields: FingerprintField[];
+      })
+    : null;
 }
 
 export function buildWebhookUrl(baseUrl: string, token: string) {
