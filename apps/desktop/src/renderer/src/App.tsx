@@ -134,6 +134,7 @@ export default function App() {
         selectedProjectId={selectedProjectId}
         onSelectProject={setSelectedProjectId}
         onCreateProject={() => void handleCreateProjectFromFolder()}
+        onOpenSettings={() => setSettingsOpen(true)}
       />
 
       <main className="workspace">
@@ -142,7 +143,6 @@ export default function App() {
           projectName={selectedProject?.name}
           repoPath={selectedProject?.repoPath}
           runtimeReady={Boolean(setupState.relayBaseUrl && setupState.codexPath)}
-          onOpenSettings={() => setSettingsOpen(true)}
         />
 
         <div className="workspace-scroll">

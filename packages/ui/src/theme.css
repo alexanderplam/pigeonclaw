@@ -1,8 +1,8 @@
 :root {
   color-scheme: dark;
-  --pc-bg: #0f1011;
+  --pc-bg: #181818;
   --pc-bg-elevated: rgba(23, 24, 27, 0.96);
-  --pc-bg-sidebar: rgba(17, 18, 20, 0.98);
+  --pc-bg-sidebar: #2c2c2c;
   --pc-surface: rgba(255, 255, 255, 0.018);
   --pc-surface-strong: rgba(255, 255, 255, 0.036);
   --pc-surface-hover: rgba(255, 255, 255, 0.055);
@@ -25,7 +25,7 @@
 }
 
 body {
-  background: linear-gradient(180deg, #111214 0%, #0c0d0f 100%);
+  background: var(--pc-bg);
   color: var(--pc-text);
   font-family: var(--pc-font-sans);
 }

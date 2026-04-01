@@ -5,13 +5,11 @@ export function StatusBar({
   projectName,
   repoPath,
   runtimeReady,
-  onOpenSettings,
 }: {
   relayStatus: string;
   projectName?: string | null;
   repoPath?: string | null;
   runtimeReady: boolean;
-  onOpenSettings: () => void;
 }) {
   return (
     <header className="status-bar">
@@ -36,13 +34,6 @@ export function StatusBar({
 
       <div className="toolbar-meta">
         {runtimeReady ? <span className="runtime-ready-indicator">Runtime ready</span> : null}
-        <button
-          className="ghost-button toolbar-settings-button"
-          type="button"
-          onClick={onOpenSettings}
-        >
-          Desktop settings
-        </button>
       </div>
     </header>
   );
