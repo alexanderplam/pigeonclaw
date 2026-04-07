@@ -33,7 +33,7 @@
     "electron-builder": "^26.0.12",
     "electron-vite": "^5.0.0",
     "tsx": "^4.19.4",
-    "vite": "^8.0.3"
+    "vite": "^8.0.7"
   },
   "build": {
     "appId": "com.pigeonclaw.desktop",
